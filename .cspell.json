@@ -55,13 +55,5 @@
     "Wrzosek"
   ],
   "flagWords": [],
-  "ignorePaths": [
-    "package.json",
-    "package-lock.json",
-    "yarn.lock",
-    "tsconfig.json",
-    "node_modules/**",
-    "/src/lib/tzip16/tzip16.ts",
-    "/src/lib/tzip21/tzip21.ts"
-  ]
+  "ignorePaths": ["package.json", "package-lock.json", "yarn.lock", "tsconfig.json", "node_modules/**", "README.md"]
 }

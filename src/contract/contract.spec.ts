@@ -95,5 +95,5 @@ test("check if token_metadata off-chain view works", async (t) => {
   const ipfsUriInBytes = tokenMetadata.token_info.get("")!;
   const ipfsUri = bytes2Char(ipfsUriInBytes);
 
-  t.regex(ipfsUri, /^sha256:\/\/.*\/ipfs:\/\/.*\/test-contract-0-token-metadata\.json$/);
+  t.regex(ipfsUri, /^sha256:\/\/.*\/ipfs:\/\/.*\/contract-0-token-metadata\.json$/);
 });

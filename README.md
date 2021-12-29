@@ -6,6 +6,8 @@
 
 Example of [FA2](https://medium.com/tqtezos/introducing-fa2-a-multi-asset-interface-for-tezos-55173d505e5f) NFT-like Tezos contract setup, compliant with [TZIP-12](https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-12/tzip-12.md), [TZIP-16](https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-16/tzip-16.md) and [TZIP-21](https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-21/tzip-21.md) with on and off chain views and metadata json generation and deployment to IPFS.
 
+[![youtube](/youtube.png)](https://youtu.be/aSBzlnIwLp4)
+
 # How to use it
 
 First of all. This is a template so you are encouraged to change everything however you like.
@@ -109,6 +111,14 @@ Here's an example script that will mint token 0 for a given account. This exampl
 
 ```
 yarn tzklar mint 0 tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb
+```
+
+**Run tests**
+
+You can write and check tests of your contract
+
+```
+yarn test
 ```
 
 ## About
