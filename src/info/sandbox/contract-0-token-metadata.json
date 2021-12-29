@@ -1,0 +1,23 @@
+{
+  "name": "Test Token",
+  "decimals": 0,
+  "symbol": "TSTTKN0",
+  "formats": [
+    {
+      "fileName": "contract-0-asset.png",
+      "dimensions": {
+        "unit": "px",
+        "value": "300x300"
+      },
+      "fileSize": 10942,
+      "mimeType": "image/png",
+      "hash": "c2410f8e3f585b68297452498bd04b6853239a21614c99bb09f21a15b479c00c",
+      "uri": "ipfs://QmYEz5VNbZQGs19pxacYwTVGq6avQDhbNb8uovEw9NU6uU/contract-0-asset.png"
+    }
+  ],
+  "artifactUri": "ipfs://QmYEz5VNbZQGs19pxacYwTVGq6avQDhbNb8uovEw9NU6uU/contract-0-asset.png",
+  "shouldPreferSymbol": false,
+  "isBooleanAmount": true,
+  "isTransferable": true,
+  "type": "image"
+}

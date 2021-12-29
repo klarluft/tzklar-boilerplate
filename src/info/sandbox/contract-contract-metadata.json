@@ -1,0 +1,493 @@
+{
+  "name": "Test Contract",
+  "description": "Some test contract",
+  "authors": [
+    "Michal Wrzosek <michal@wrzosek.pl>"
+  ],
+  "homepage": "https://tzklar.com",
+  "interfaces": [
+    "TZIP-012-1728fcfe",
+    "TZIP-16-21fb73fe",
+    "TZIP-21-1728fcfe"
+  ],
+  "views": [
+    {
+      "name": "get_balance",
+      "description": "Get balance for some address and token id",
+      "pure": true,
+      "implementations": [
+        {
+          "michelsonStorageView": {
+            "code": [
+              {
+                "prim": "UNPAIR"
+              },
+              {
+                "prim": "SWAP"
+              },
+              {
+                "prim": "CAR"
+              },
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "CAR"
+              },
+              {
+                "prim": "SWAP"
+              },
+              {
+                "prim": "DUP"
+              },
+              {
+                "prim": "DUG",
+                "args": [
+                  {
+                    "int": "2"
+                  }
+                ]
+              },
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "DIG",
+                "args": [
+                  {
+                    "int": "2"
+                  }
+                ]
+              },
+              {
+                "prim": "CAR"
+              },
+              {
+                "prim": "PAIR"
+              },
+              {
+                "prim": "GET"
+              },
+              {
+                "prim": "IF_NONE",
+                "args": [
+                  [
+                    {
+                      "prim": "PUSH",
+                      "args": [
+                        {
+                          "prim": "nat"
+                        },
+                        {
+                          "int": "0"
+                        }
+                      ]
+                    }
+                  ],
+                  []
+                ]
+              }
+            ],
+            "parameter": {
+              "prim": "pair",
+              "args": [
+                {
+                  "prim": "address",
+                  "annots": [
+                    "%owner"
+                  ]
+                },
+                {
+                  "prim": "nat",
+                  "annots": [
+                    "%token_id"
+                  ]
+                }
+              ]
+            },
+            "annotations": [
+              {
+                "name": "owner",
+                "description": "account address to check balance for"
+              },
+              {
+                "name": "token_id",
+                "description": "token id number that you want to check balance for"
+              }
+            ],
+            "returnType": {
+              "prim": "nat"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "total_supply",
+      "description": "Get total supply for a given token id",
+      "pure": true,
+      "implementations": [
+        {
+          "michelsonStorageView": {
+            "code": [
+              {
+                "prim": "UNPAIR"
+              },
+              {
+                "prim": "SWAP"
+              },
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "SWAP"
+              },
+              {
+                "prim": "GET"
+              },
+              {
+                "prim": "IF_NONE",
+                "args": [
+                  [
+                    {
+                      "prim": "PUSH",
+                      "args": [
+                        {
+                          "prim": "string"
+                        },
+                        {
+                          "string": "FA2_TOKEN_UNDEFINED"
+                        }
+                      ]
+                    },
+                    {
+                      "prim": "FAILWITH"
+                    }
+                  ],
+                  []
+                ]
+              }
+            ],
+            "returnType": {
+              "prim": "nat",
+              "annots": [
+                "%supply"
+              ]
+            },
+            "parameter": {
+              "prim": "nat",
+              "annots": [
+                "%token_id"
+              ]
+            },
+            "annotations": [
+              {
+                "name": "token_id",
+                "description": "Token id that you're checking supply of"
+              },
+              {
+                "name": "supply",
+                "description": "Nr of tokens minted for that token id"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "all_tokens",
+      "description": "Get a list of all token ids",
+      "pure": true,
+      "implementations": [
+        {
+          "michelsonStorageView": {
+            "code": [
+              {
+                "prim": "CAR"
+              },
+              {
+                "prim": "CAR"
+              },
+              {
+                "prim": "CDR"
+              }
+            ],
+            "returnType": {
+              "prim": "list",
+              "args": [
+                {
+                  "prim": "nat"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "is_operator",
+      "description": "Check if a given account can transfer token of a given id owned by some other account",
+      "pure": true,
+      "implementations": [
+        {
+          "michelsonStorageView": {
+            "code": [
+              {
+                "prim": "UNPAIR"
+              },
+              {
+                "prim": "SWAP"
+              },
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "CAR"
+              },
+              {
+                "prim": "CAR"
+              },
+              {
+                "prim": "SWAP"
+              },
+              {
+                "prim": "DUP"
+              },
+              {
+                "prim": "DUG",
+                "args": [
+                  {
+                    "int": "2"
+                  }
+                ]
+              },
+              {
+                "prim": "GET",
+                "args": [
+                  {
+                    "int": "4"
+                  }
+                ]
+              },
+              {
+                "prim": "DUP",
+                "args": [
+                  {
+                    "int": "3"
+                  }
+                ]
+              },
+              {
+                "prim": "GET",
+                "args": [
+                  {
+                    "int": "3"
+                  }
+                ]
+              },
+              {
+                "prim": "PAIR"
+              },
+              {
+                "prim": "DIG",
+                "args": [
+                  {
+                    "int": "2"
+                  }
+                ]
+              },
+              {
+                "prim": "CAR"
+              },
+              {
+                "prim": "PAIR"
+              },
+              {
+                "prim": "GET"
+              },
+              {
+                "prim": "IF_NONE",
+                "args": [
+                  [
+                    {
+                      "prim": "PUSH",
+                      "args": [
+                        {
+                          "prim": "bool"
+                        },
+                        {
+                          "prim": "False"
+                        }
+                      ]
+                    }
+                  ],
+                  [
+                    {
+                      "prim": "DROP"
+                    },
+                    {
+                      "prim": "PUSH",
+                      "args": [
+                        {
+                          "prim": "bool"
+                        },
+                        {
+                          "prim": "True"
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ],
+            "parameter": {
+              "prim": "pair",
+              "args": [
+                {
+                  "prim": "address",
+                  "annots": [
+                    "%owner"
+                  ]
+                },
+                {
+                  "prim": "pair",
+                  "args": [
+                    {
+                      "prim": "address",
+                      "annots": [
+                        "%operator"
+                      ]
+                    },
+                    {
+                      "prim": "nat",
+                      "annots": [
+                        "%token_id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "returnType": {
+              "prim": "bool"
+            },
+            "annotations": [
+              {
+                "name": "owner",
+                "description": "Address of the owner of the token"
+              },
+              {
+                "name": "operator",
+                "description": "Address of the operator"
+              },
+              {
+                "name": "token_id",
+                "description": "Token id"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "token_metadata",
+      "description": "Token metadata map for a given token id",
+      "pure": true,
+      "implementations": [
+        {
+          "michelsonStorageView": {
+            "code": [
+              {
+                "prim": "UNPAIR"
+              },
+              {
+                "prim": "SWAP"
+              },
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "CAR"
+              },
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "SWAP"
+              },
+              {
+                "prim": "GET"
+              },
+              {
+                "prim": "IF_NONE",
+                "args": [
+                  [
+                    {
+                      "prim": "PUSH",
+                      "args": [
+                        {
+                          "prim": "string"
+                        },
+                        {
+                          "string": "FA2_TOKEN_UNDEFINED"
+                        }
+                      ]
+                    },
+                    {
+                      "prim": "FAILWITH"
+                    }
+                  ],
+                  []
+                ]
+              }
+            ],
+            "parameter": {
+              "prim": "nat",
+              "annots": [
+                "%token_id"
+              ]
+            },
+            "returnType": {
+              "prim": "pair",
+              "args": [
+                {
+                  "prim": "nat",
+                  "annots": [
+                    "%token_id"
+                  ]
+                },
+                {
+                  "prim": "map",
+                  "annots": [
+                    "%token_info"
+                  ],
+                  "args": [
+                    {
+                      "prim": "string"
+                    },
+                    {
+                      "prim": "bytes"
+                    }
+                  ]
+                }
+              ]
+            },
+            "annotations": [
+              {
+                "name": "token_id",
+                "description": "Token id"
+              },
+              {
+                "name": "token_info",
+                "description": "Token info map with string as keys and bytes as values"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
