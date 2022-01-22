@@ -20,7 +20,7 @@ import { startSandbox } from "./start-sandbox";
 import { stopSandbox } from "./stop-sandbox";
 import { mint } from "./mint";
 import { checkTezosConfig } from "./get-tezos-toolkit";
-
+import { CONTRACT_RELIGO_SYNTAX, CONTRACT_SYNTAXES } from "./configuration";
 const packageJson = JSON.parse(fs.readFileSync(PACKAGE_JSON_FILE_PATH).toString());
 
 // configuration
@@ -48,18 +48,27 @@ program
   .description("stops local sandbox tezos blockchain using docker")
   .action(stopSandbox);
 
+const validateSyntax = (value: string) => {
+  if (!Object.keys(CONTRACT_SYNTAXES).includes(value)) {
+    throw new InvalidArgumentError("Not supported syntax");
+  }
+  return value;
+};
+
 //prettier-ignore
 program
   .command('compile-contract')
   .alias('cc')
-  .description('compiles religo contract into tz and json format')
+  .description('compiles contract into tz and json format')
+  .argument('[syntax]', 'contract syntax to compile', validateSyntax, CONTRACT_RELIGO_SYNTAX)
   .action(compileContract);
 
 //prettier-ignore
 program
   .command("compile-off-chain-views")
   .alias("cocv")
-  .description("compiles religo contract and export json code for certain (off-chain view) functions")
+  .description("compiles contract and export json code for certain (off-chain view) functions")
+  .argument('[syntax]', 'contract syntax to compile', validateSyntax, CONTRACT_RELIGO_SYNTAX)
   .action(compileOffChainViews);
 
 //prettier-ignore

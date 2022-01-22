@@ -1,0 +1,417 @@
+/* ERROR CODES */
+const fa2_token_undefined_error_const = "FA2_TOKEN_UNDEFINED";
+const fa2_insufficient_balance_error_const = "FA2_INSUFFICIENT_BALANCE";
+const fa2_tx_denied_error_const = "FA2_TX_DENIED";
+const fa2_not_owner_error_const = "FA2_NOT_OWNER";
+const fa2_not_operator_error_const = "FA2_NOT_OPERATOR";
+const fa2_operators_not_supported_error_const = "FA2_OPERATORS_UNSUPPORTED";
+const fa2_receiver_hook_failed_error_const = "FA2_RECEIVER_HOOK_FAILED";
+const fa2_sender_hook_failed_error_const = "FA2_SENDER_HOOK_FAILED";
+const fa2_receiver_hook_undefined_error_const = "FA2_RECEIVER_HOOK_UNDEFINED";
+const fa2_sender_hook_undefined_error_const = "FA2_SENDER_HOOK_UNDEFINED";
+const not_admin_error_const = "NOT_ADMIN";
+
+/* SOME GENERAL TYPES */
+type token_id_type = nat;
+type nr_of_tokens_type = nat;
+type amount_type = nat;
+type admin_type = address;
+type new_owner_type = address;
+type owner_address_type = address;
+type operator_address_type = address;
+
+/* TRANSFER TYPES */
+type transfer_destination_type =
+// @layout:comb 
+{
+    to_: address,
+    token_id: token_id_type,
+    amount: amount_type
+};
+type transfer_type =
+// @layout:comb 
+{
+    from_: address,
+    txs: list<transfer_destination_type>
+};
+type transfer_params_type = list<transfer_type>;
+
+/* BALANCE OF TYPES */
+type balance_of_request_type =
+// @layout:comb 
+{
+    owner: address,
+    token_id: token_id_type
+};
+type balance_of_response_type =
+// @layout:comb 
+{
+    request: balance_of_request_type,
+    balance: nat
+};
+type balance_of_params_type =
+// @layout:comb 
+{
+    requests: list<balance_of_request_type>,
+    callback: contract<list<balance_of_response_type>>
+};
+
+/* UPDATE OPERATORS TYPES */
+type update_operator_action_params_type =
+// @layout:comb 
+{
+    owner: address,
+    operator: address,
+    token_id: token_id_type
+};
+type update_operator_action_type =
+// @layout:comb 
+| ["Add_operator", update_operator_action_params_type]
+| ["Remove_operator", update_operator_action_params_type];
+type update_operators_params_type = list<update_operator_action_type>;
+
+/* MINT TYPES */
+type mint_instruction_type =
+// @layout:comb 
+{
+    to_: new_owner_type,
+    token_id: token_id_type,
+    amount: amount_type,
+};
+type mint_params_type = list<mint_instruction_type>;
+
+/* LEDGER TYPES */
+type ledger_value_type = nat;
+type ledger_key_type = [owner_address_type, token_id_type];
+type ledger_type = big_map<ledger_key_type, ledger_value_type>;
+
+/* OPERATOR TYPES */
+type operators_key_type = [owner_address_type, [operator_address_type, token_id_type]];
+type operators_type = big_map<operators_key_type, unit>;
+
+/**
+ * CONTRACT METADATA TYPES
+ * TZIP-16
+ * https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-16/tzip-16.md
+ */
+type contract_metadata_type = big_map<string, bytes>;
+
+/**
+ * TOKEN METADATA TYPES
+ * TZIP-12, TZIP-21
+ * https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-12/tzip-12.md
+ * https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-21/tzip-21.md
+ */
+
+type token_info_type = map<string, bytes>;
+type token_metadata_value_type =
+// @layout:comb 
+{
+    token_id: token_id_type,
+    token_info: token_info_type
+};
+type token_metadata_type = big_map<token_id_type, token_metadata_value_type>;
+
+/**
+ * OFF/ON CHAIN VIEWS TYPES
+ * TZIP-12, TZIP-16
+ */
+type all_tokens_type = list<token_id_type>;
+type get_balance_params_type =
+// @layout:comb 
+{
+    owner: owner_address_type,
+    token_id: token_id_type
+};
+type total_supply_type = big_map<token_id_type, nr_of_tokens_type>;
+type total_supply_params_type = token_id_type;
+type is_operator_params_type =
+// @layout:comb 
+{
+    owner: owner_address_type,
+    operator: operator_address_type,
+    token_id: token_id_type
+};
+
+/* STORAGE TYPES */
+type storage_type =
+{
+    ledger: ledger_type,
+    operators: operators_type,
+    metadata: contract_metadata_type,
+    token_metadata: token_metadata_type,
+    total_supply: total_supply_type,
+    all_tokens: all_tokens_type,
+    admin: admin_type
+};
+
+/* ACTION TYPES */
+type action_type =
+| ["Balance_of", balance_of_params_type]
+| ["Transfer", transfer_params_type] 
+| ["Update_operators", update_operators_params_type];
+
+/* RETURN TYPES */
+type return_type = [list<operation>, storage_type];
+
+/* TRANSFER */
+const transfer = (params: transfer_params_type, storage: storage_type): return_type => {
+  const transaction_sender = Tezos.sender;
+  const transfers: list<transfer_type> = params;
+
+  const new_ledger = List.fold((ledger: ledger_type, transfer_operation: transfer_type): ledger_type => {
+    const transfer_from: address = transfer_operation.from_;
+    const transfer_destinations: list<transfer_destination_type> = transfer_operation.txs;
+
+    return List.fold((ledger: ledger_type, transfer_destination: transfer_destination_type): ledger_type => {
+      const transfer_to: address = transfer_destination.to_;
+      const transfer_token_id: token_id_type = transfer_destination.token_id;
+      const transfer_amount: amount_type = transfer_destination.amount;
+
+      const is_sender_an_owner: bool = transaction_sender == transfer_from;
+      const operators_key: operators_key_type = [transfer_from, [transaction_sender, transfer_token_id]];
+      const is_sender_an_operator: bool = Big_map.mem(operators_key, storage.operators);
+      const previous_owner_ledger_key: ledger_key_type = [transfer_from, transfer_token_id];
+      const new_owner_ledger_key: ledger_key_type = [transfer_to, transfer_token_id];
+      const is_token_supported: bool = Big_map.mem(transfer_token_id, storage.token_metadata);
+      const is_transfering_correct_amount: bool = transfer_amount <= (1 as nat);
+
+      /* only owner or owner's operator can make a transfer */
+      let _assert = assert_with_error(
+        is_sender_an_owner || is_sender_an_operator,
+        fa2_not_operator_error_const
+      );
+
+      /* you can't transfer token that is not supported */
+      _assert = assert_with_error(is_token_supported, fa2_token_undefined_error_const);
+
+      /* you can't transfer more then 1 NFT */
+      _assert = assert_with_error(is_transfering_correct_amount, fa2_tx_denied_error_const);
+
+      /* ignore empty transfers; return unchanged ledger */
+      if (transfer_amount == (0 as nat)) {
+        return ledger;
+      } else {
+        const previous_owner_account_balance: nat = match(Big_map.find_opt(previous_owner_ledger_key, ledger), {
+           Some: account_balance => account_balance,
+           None: () => 0 as nat
+        });
+        const new_owner_account_balance: nat = match(Big_map.find_opt(new_owner_ledger_key, ledger), {
+           Some: account_balance => account_balance,
+           None: () => 0 as nat
+        });
+
+        /* owner needs to have a token to transfer it */
+        _assert = assert_with_error(previous_owner_account_balance == (1 as nat), fa2_insufficient_balance_error_const);
+
+        /* owner can't make transfer back to the same account */
+        _assert = assert_with_error(transfer_from != transfer_to, fa2_insufficient_balance_error_const);
+
+        /* new owner should not have a token */
+        _assert = assert_with_error(new_owner_account_balance == (0 as nat), fa2_insufficient_balance_error_const);
+
+        /* remove previous owner from ledger */
+        const ledger_without_previous_owner: ledger_type = Big_map.remove(previous_owner_ledger_key, ledger);
+
+        /* add new owner to ledger */
+        const ledger_after_transfer: ledger_type = Big_map.add(new_owner_ledger_key, 1 as nat, ledger_without_previous_owner);
+
+        /* return new ledger */
+        return ledger_after_transfer;
+      }
+    }, transfer_destinations, ledger)
+  }, transfers, storage.ledger);
+
+  return [list([]) as list<operation>, { ...storage, ledger: new_ledger }];
+};
+
+/* BALANCE OF */
+const balance_of = (params: balance_of_params_type, storage: storage_type): return_type => {
+  const responses: list<balance_of_response_type> = List.map(
+    (request: balance_of_request_type): balance_of_response_type => {
+      const account_balance: nat = match(Big_map.find_opt([request.owner, request.token_id], storage.ledger), {
+        None: () => 0 as nat,
+        Some: account_balance => account_balance
+      });
+
+      const response: balance_of_response_type = { 
+          request: request, 
+          balance: account_balance 
+      };
+      return response;
+    },
+    params.requests
+  );
+
+  const callback_operation = Tezos.transaction(responses, 0 as mutez, params.callback);
+
+  return [list([callback_operation]), storage];
+};
+
+/* UPDATE OPERATORS */
+const update_operators = (params:update_operators_params_type, storage: storage_type): return_type => {
+  const transaction_sender: address = Tezos.sender;
+  const update_operator_actions: list<update_operator_action_type> = params;
+
+  const new_operators: operators_type = List.fold(
+    (operators: operators_type, update_operator_action: update_operator_action_type): operators_type => {
+      const update_operator_action_params = match(update_operator_action, {
+        Add_operator: params => params,
+        Remove_operator: params => params
+      });
+
+      /* only owner can update operators */
+      let _assert = assert_with_error(transaction_sender == update_operator_action_params.owner, fa2_not_owner_error_const);
+
+      const operators_key: operators_key_type = [
+        update_operator_action_params.owner,
+        [
+            update_operator_action_params.operator,
+            update_operator_action_params.token_id
+        ]
+      ];
+
+      /* Add or remove operator */
+      const new_operators: operators_type = match(update_operator_action, {
+         Add_operator: _none => Big_map.add(operators_key, unit, operators),
+         Remove_operator: _none => Big_map.remove(operators_key, operators)
+      });
+
+      /* Return new operators */
+      return new_operators;
+    },
+    update_operator_actions,
+    storage.operators
+  );
+
+  return [list([]) as list<operation>, { ...storage, operators: new_operators }];
+};
+
+/* MINT */
+const mint = (params: mint_params_type, storage: storage_type): return_type => {
+  const transaction_sender: address = Tezos.sender;
+
+  /* Only admin can mint */
+  let _assert = assert_with_error(transaction_sender == storage.admin, not_admin_error_const);
+
+  const mint_instructions: list<mint_instruction_type> = params;
+
+  const new_storage = List.fold(
+    (storage: storage_type, mint_instruction: mint_instruction_type): storage_type => {
+      const mint_to = mint_instruction.to_;
+      const mint_token_id = mint_instruction.token_id;
+      const mint_amount = mint_instruction.amount;
+
+      const is_token_supported: bool = Big_map.mem(mint_token_id, storage.token_metadata);
+      const is_minting_correct_amount: bool = mint_amount <= (1 as nat);
+      const new_owner_ledger_key: ledger_key_type = [mint_to, mint_token_id];
+      
+      /* you can't transfer token that is not supported */
+      let _assert = assert_with_error(is_token_supported, fa2_token_undefined_error_const);
+
+      /* you can't mint more then 1 NFT */
+      _assert = assert_with_error(is_minting_correct_amount, fa2_insufficient_balance_error_const);
+
+      /* ignore empty mint; return unchanged ledger */
+      if (mint_amount == (0 as nat)) {
+        return storage;
+      } else {
+        const account_balance: nat = match(
+            Big_map.find_opt(new_owner_ledger_key, storage.ledger), {
+              Some: account_balance => account_balance,
+              None: () => 0 as nat
+            });
+
+        /* new owner should not have a token */
+        _assert = assert_with_error(account_balance == (0 as nat), fa2_insufficient_balance_error_const);
+
+        /* add new owner to ledger */
+        const ledger_after_minting: ledger_type = Big_map.add(new_owner_ledger_key, 1 as nat, storage.ledger);
+
+        /* update total supply */
+        const total_supply_for_token: nr_of_tokens_type = match(
+            Big_map.find_opt(mint_token_id, storage.total_supply), {
+              Some: nr_of_tokens => nr_of_tokens,
+              None: () => failwith(fa2_token_undefined_error_const) as nr_of_tokens_type
+            });
+
+        const total_supply_for_token_after_minting = total_supply_for_token + (1 as nat);
+
+        const total_supply_after_minting = Big_map.update(
+          mint_token_id,
+          Some(total_supply_for_token_after_minting),
+          storage.total_supply
+        );
+
+        /* return updated storage */
+        return {
+          ...storage,
+          ledger: ledger_after_minting,
+          total_supply: total_supply_after_minting
+        };
+      }
+    },
+    mint_instructions,
+    storage
+  );
+
+  return [list([]) as list<operation>, new_storage];
+};
+
+/**
+  * ON/OFF CHAIN VIEWS
+  * TZIP-12, TZIP-16
+  */
+// @view
+const get_balance = (params: get_balance_params_type, storage: storage_type): amount_type => {
+  const ledger_key: ledger_key_type = [params.owner, params.token_id];
+
+  return match(Big_map.find_opt(ledger_key, storage.ledger), {
+    Some: account_balance => account_balance,
+    None: () => 0 as nat
+  });
+};
+
+const get_balance_off_chain_view = (params: get_balance_params_type, storage: storage_type): amount_type => get_balance(params, storage);
+
+// @view 
+const total_supply = (params: total_supply_params_type, storage: storage_type): nr_of_tokens_type => 
+    match(Big_map.find_opt(params, storage.total_supply), {
+        Some: nr_of_tokens => nr_of_tokens,
+        None: () => failwith(fa2_token_undefined_error_const) as nr_of_tokens_type
+    });
+
+const total_supply_off_chain_view = (params: total_supply_params_type, storage: storage_type): nr_of_tokens_type => total_supply(params, storage);
+
+// @view 
+const all_tokens = (_params: unit, storage: storage_type) : all_tokens_type => storage.all_tokens;
+
+const all_tokens_off_chain_view = (storage: storage_type): all_tokens_type => all_tokens(unit, storage);
+
+// @view
+const is_operator = (params: is_operator_params_type, storage: storage_type) : bool => {
+  const operators_key: operators_key_type = [params.owner, [params.operator, params.token_id]];
+
+  return match(Big_map.find_opt(operators_key, storage.operators), {
+    Some: () => true,
+    None: () => false
+  });
+};
+
+const is_operator_off_chain_view = (params: is_operator_params_type, storage: storage_type): bool => is_operator(params, storage);
+
+// @view 
+const token_metadata = (token_id: token_id_type, storage: storage_type) : token_metadata_value_type => match(Big_map.find_opt(token_id, storage.token_metadata), {
+    Some: token_metadata_value => token_metadata_value,
+    None: () => failwith(fa2_token_undefined_error_const) as token_metadata_value_type
+  });
+
+const token_metadata_off_chain_view = (token_id: token_id_type, storage: storage_type): token_metadata_value_type => token_metadata(token_id, storage);
+
+/* MAIN */
+const main = (action: action_type, storage: storage_type): return_type => match(action, {
+    Transfer: params => transfer(params, storage),
+    Balance_of: params => balance_of(params, storage),
+    Update_operators: params => update_operators(params, storage)
+});
+
