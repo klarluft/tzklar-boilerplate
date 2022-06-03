@@ -53,10 +53,16 @@ yarn tzklar check-tezos-config
 
 **Compile contract**
 
-It will take your ReasonLIGO contract and compile it to Michelson (.tz and .json). Example FA2 contract is located in [`./src/contract/contract.religo`](./src/contract/contract.religo).
+It will take your ReasonLIGO contract by default and compile it to Michelson (.tz and .json). Example FA2 contract is located in [`./src/contract/contract.religo`](./src/contract/contract.religo).
 
 ```
 yarn tzklar compile-contract
+```
+
+for JsIGO version you can pass an optional parameter
+
+```
+yarn tzklar compile-contract jsligo
 ```
 
 **Compile off-chain views**
@@ -65,6 +71,12 @@ To be compliant with TZIP-12 and TZIP-16 we need Michelson code for our off-chai
 
 ```
 yarn tzklar compile-off-chain-views
+```
+
+for JsLIGO version you can pass an optional parameter
+
+```
+yarn tzklar compile-off-chain-views jsligo
 ```
 
 **Generate contract metadata**
