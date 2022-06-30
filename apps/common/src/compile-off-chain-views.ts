@@ -4,7 +4,12 @@ import util from "util";
 
 import * as kleur from "kleur";
 
-import { CONTRACT_RELIGO_FILE_NAME, CONTRACT_RELIGO_FILE_PATH, OFF_CHAIN_VIEWS_TO_COMPILE } from "./configuration";
+import {
+  CONTRACT_RELIGO_FILE_NAME,
+  CONTRACT_RELIGO_FILE_PATH,
+  DOCKER_LIGO_IMAGE,
+  OFF_CHAIN_VIEWS_TO_COMPILE,
+} from "./configuration";
 
 const exec = util.promisify(child_process.exec);
 
@@ -25,7 +30,7 @@ export async function compileOffChainViews() {
     );
     const { stdout: offChainViewString } = await exec(
       [
-        `docker run --rm -v "$PWD":"$PWD" -w "$PWD" ligolang/ligo:0.31.0`,
+        `docker run --rm -v "$PWD":"$PWD" -w "$PWD" ${DOCKER_LIGO_IMAGE}`,
         `compile expression reasonligo ${offChainViewToCompile.expressionName}`,
         `--init-file ${CONTRACT_RELIGO_FILE_PATH}`,
         `--michelson-format json`,

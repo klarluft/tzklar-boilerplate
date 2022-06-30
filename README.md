@@ -121,6 +121,13 @@ You can write and check tests of your contract
 yarn test
 ```
 
+## References
+
+Resources that were very helpful in creating this repository:
+
+- https://github.com/oxheadalpha/nft-tutorial
+- https://github.com/oxheadalpha/smart-contracts
+
 ## About
 
 [![klarluft](./klarluft-logo-black.png)](https://klarluft.com)

@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package ligo.v1;
+
+service LigoService {
+  rpc CompileContract(CompileContractRequest) returns (CompileContractResponse) {}
+  rpc CompileExpression(CompileExpressionRequest) returns (CompileExpressionResponse) {}
+}
+
+enum DisplayFormat {
+  DISPLAY_FORMAT_DEV = 0;
+  DISPLAY_FORMAT_JSON = 1;
+  DISPLAY_FORMAT_HUMAN_READABLE = 2;
+}
+
+enum MichelsonFormat {
+  MICHELSON_FORMAT_TEXT = 0;
+  MICHELSON_FORMAT_JSON = 1;
+  MICHELSON_FORMAT_HEX = 2;
+}
+
+enum Syntax {
+  SYNTAX_PASCALIGO = 0;
+  SYNTAX_CAMELIGO = 1;
+  SYNTAX_REASONLIGO = 2;
+  SYNTAX_JSLIGO = 3;
+}
+
+enum Protocol {
+  PROTOCOL_HANGZHOU = 0;
+  PROTOCOL_ITHACA = 1;
+}
+
+message CompileContractRequest {
+  string contract_content = 1;
+  repeated string constants = 2;
+  optional bool disable_michelson_typechecking = 3;
+  optional DisplayFormat display_format = 4;
+  optional MichelsonFormat michelson_format = 5;
+  Syntax syntax = 6;
+  repeated string views = 7;
+  string entry_point = 8;
+  optional Protocol protocol = 9;
+}
+
+message CompileContractResponse {
+  string compiled_contract_content = 1;
+}
+
+message CompileExpressionRequest {
+  string contract_content = 1;
+  Syntax syntax = 2;
+  string expression_name = 3;
+  optional DisplayFormat display_format = 4;
+  optional MichelsonFormat michelson_format = 5;
+  optional Protocol protocol = 6;
+}
+
+message CompileExpressionResponse {
+  string compiled_expression_content = 1;
+}

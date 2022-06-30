@@ -10,6 +10,7 @@ import {
   CONTRACT_RELIGO_FILE_PATH,
   CONTRACT_TZ_FILE_NAME,
   CONTRACT_TZ_FILE_PATH,
+  DOCKER_LIGO_IMAGE,
 } from "./configuration";
 
 const exec = util.promisify(child_process.exec);
@@ -24,7 +25,7 @@ export async function compileContract() {
   console.log("");
   await exec(
     [
-      `docker run --rm -v "$PWD":"$PWD" -w "$PWD" ligolang/ligo:0.31.0`,
+      `docker run --rm -v "$PWD":"$PWD" -w "$PWD" ${DOCKER_LIGO_IMAGE}`,
       `compile contract`,
       `${CONTRACT_RELIGO_FILE_PATH}`,
       `--entry-point main`,
@@ -39,7 +40,7 @@ export async function compileContract() {
   /** compiling into JSON */
   await exec(
     [
-      `docker run --rm -v "$PWD":"$PWD" -w "$PWD" ligolang/ligo:0.31.0`,
+      `docker run --rm -v "$PWD":"$PWD" -w "$PWD" ${DOCKER_LIGO_IMAGE}`,
       `compile contract`,
       `${CONTRACT_RELIGO_FILE_PATH}`,
       `--entry-point main`,

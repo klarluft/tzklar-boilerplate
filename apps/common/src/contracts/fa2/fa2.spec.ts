@@ -10,10 +10,10 @@ import { bytes2Char, tzip16 } from "@taquito/tzip16";
 import test from "ava";
 import { BigNumber } from "bignumber.js";
 
-import { CONTRACT_TEZOS_FILE_PATH, SIGNER_ADDRESS } from "../configuration";
-import { getTezosToolkit } from "../get-tezos-toolkit";
-import { ContractTezosInfoType } from "../originate-contract";
-import { ContractStorageTokenMetadataValueType } from "../storage";
+import { CONTRACT_TEZOS_FILE_PATH, SIGNER_ADDRESS } from "../../configuration";
+import { getTezosToolkit } from "../../get-tezos-toolkit";
+import { ContractTezosInfoType } from "../../originate-contract";
+import { ContractStorageTokenMetadataValueType } from "../../storage";
 
 const setup = async () => {
   const tezosToolkit = await getTezosToolkit();

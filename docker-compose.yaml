@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  ligo:
+    container_name: ligo
+    build:
+      context: .
+      dockerfile: ligo.Dockerfile
+    ports:
+      - "4000:4000"

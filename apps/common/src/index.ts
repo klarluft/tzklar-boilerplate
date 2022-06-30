@@ -20,12 +20,24 @@ import { startSandbox } from "./start-sandbox";
 import { stopSandbox } from "./stop-sandbox";
 import { mint } from "./mint";
 import { checkTezosConfig } from "./get-tezos-toolkit";
+import { govCompile } from "./contracts/governor/governor-compile";
+import { testEndpoint } from "./test-endpoint";
 
 const packageJson = JSON.parse(fs.readFileSync(PACKAGE_JSON_FILE_PATH).toString());
 
 // configuration
 
 program.version(packageJson.version);
+
+//prettier-ignore
+program
+  .command("test-endpoint")
+  .action(testEndpoint);
+
+//prettier-ignore
+program
+  .command("gov-compile")
+  .action(govCompile);
 
 //prettier-ignore
 program

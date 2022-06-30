@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "build/main",
+    "rootDir": "src",
+    "declaration": true,
+    "lib": ["es2017", "esnext", "dom"],
+    "types": ["node"],
+    "typeRoots": ["node_modules/@types"],
+    "baseUrl": ".",
+    "composite": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules/**"],
+  "compileOnSave": false
+}
